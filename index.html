@@ -91,6 +91,8 @@
             height: 350px;
             object-fit: cover;
             border-bottom: 1px solid var(--border-color);
+            display: block;
+            background-color: #070a12;
         }
 
         .movie-info {
@@ -146,12 +148,13 @@
             color: var(--text-color);
             border-radius: 4px;
             font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
             outline: none;
             border-color: var(--accent-color);
-            box-shadow: 0 0 5px var(--accent-glow);
+            box-shadow: 0 0 8px var(--accent-glow);
         }
 
         button {
@@ -165,11 +168,16 @@
             width: 100%;
             font-size: 1rem;
             text-transform: uppercase;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
         }
 
         button:hover {
             background-color: #00b0d4;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        button:active {
+            transform: scale(0.99);
         }
 
         .review-item {
@@ -178,6 +186,18 @@
             padding: 15px;
             border-radius: 6px;
             margin-bottom: 15px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .review-header {
@@ -185,21 +205,38 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
+            gap: 10px;
         }
 
         .review-author {
             font-weight: bold;
             color: var(--accent-color);
+            overflow-wrap: break-word;
+        }
+
+        .review-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .review-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
 
         .review-stars {
             color: #facc15;
             font-size: 0.9rem;
+            letter-spacing: 1px;
         }
 
         .review-text {
             color: var(--text-muted);
             font-size: 0.95rem;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
         }
 
         footer {
@@ -225,21 +262,21 @@
         <h2 class="section-title">Galería de la Saga</h2>
         <div class="gallery">
             <div class="movie-card">
-                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80" alt="RoboCop 1">
+                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80" alt="RoboCop 1" onerror="handleImageError(this, 'RoboCop (1987)')">
                 <div class="movie-info">
                     <h3>RoboCop (1987)</h3>
                     <p>El clásico dirigido por Paul Verhoeven que definió el género de acción y ciencia ficción.</p>
                 </div>
             </div>
             <div class="movie-card">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" alt="RoboCop 2">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" alt="RoboCop 2" onerror="handleImageError(this, 'RoboCop 2 (1990)')">
                 <div class="movie-info">
                     <h3>RoboCop 2 (1990)</h3>
                     <p>Alex Murphy se enfrenta a una nueva y peligrosa amenaza en las calles de Detroit y a Cain.</p>
                 </div>
             </div>
             <div class="movie-card">
-                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80" alt="RoboCop Remake">
+                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80" alt="RoboCop Remake" onerror="handleImageError(this, 'RoboCop (Remake 2014)')">
                 <div class="movie-info">
                     <h3>RoboCop (Remake 2014)</h3>
                     <p>Una reinterpretación moderna del clásico, explorando los dilemas éticos de la tecnología.</p>
@@ -281,20 +318,7 @@
             <div class="reviews-list-container">
                 <h3 style="margin-bottom: 20px;">Lo que dice la comunidad</h3>
                 <div id="reviewsList">
-                    <div class="review-item">
-                        <div class="review-header">
-                            <span class="review-author">Clarence Bodicker</span>
-                            <span class="review-stars">★★★★★</span>
-                        </div>
-                        <p class="review-text">¡Un clásico absoluto! La primera película de 1987 tiene la mejor sátira y acción de los 80.</p>
-                    </div>
-                    <div class="review-item">
-                        <div class="review-header">
-                            <span class="review-author">Oficial Lewis</span>
-                            <span class="review-stars">★★★★☆</span>
-                        </div>
-                        <p class="review-text">La armería y los efectos prácticos son increíbles. ¡Un gran recordatorio de que Detroit necesita orden!</p>
-                    </div>
+                    <!-- Las reseñas se renderizan dinámicamente -->
                 </div>
             </div>
 
@@ -306,41 +330,148 @@
     </footer>
 
     <script>
-        // Script para manejar el formulario y agregar opiniones dinámicamente
+        // Reseñas predeterminadas
+        const defaultReviews = [
+            {
+                name: "Clarence Bodicker",
+                rating: "★★★★★",
+                comment: "¡Un clásico absoluto! La primera película de 1987 tiene la mejor sátira y acción de los 80.",
+                date: "1987-07-17"
+            },
+            {
+                name: "Oficial Lewis",
+                rating: "★★★★☆",
+                comment: "La armería y los efectos prácticos son increíbles. ¡Un gran recordatorio de que Detroit necesita orden!",
+                date: "1990-06-22"
+            }
+        ];
+
+        const STORAGE_KEY = "robocop_fan_reviews";
         const reviewForm = document.getElementById('reviewForm');
         const reviewsList = document.getElementById('reviewsList');
 
+        // Formato amigable de fecha
+        function formatDate(dateStr) {
+            try {
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr;
+                return d.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+        // Obtener opiniones guardadas
+        function getSavedReviews() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        return parsed;
+                    }
+                }
+            } catch (e) {
+                console.warn("No se pudo leer localStorage:", e);
+            }
+            return [...defaultReviews];
+        }
+
+        // Guardar opiniones en localStorage
+        function saveReviews(reviews) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(reviews));
+            } catch (e) {
+                console.warn("No se pudo guardar en localStorage:", e);
+            }
+        }
+
+        // Crear elemento DOM de reseña
+        function createReviewElement(review) {
+            const item = document.createElement('div');
+            item.classList.add('review-item');
+            const formattedDate = formatDate(review.date || new Date().toISOString());
+
+            item.innerHTML = `
+                <div class="review-header">
+                    <span class="review-author">${escapeHTML(review.name)}</span>
+                    <div class="review-meta">
+                        <span class="review-date">${escapeHTML(formattedDate)}</span>
+                        <span class="review-stars">${escapeHTML(review.rating)}</span>
+                    </div>
+                </div>
+                <p class="review-text">${escapeHTML(review.comment)}</p>
+            `;
+            return item;
+        }
+
+        // Renderizar lista completa de opiniones
+        function renderReviews() {
+            reviewsList.innerHTML = '';
+            const reviews = getSavedReviews();
+            reviews.forEach(review => {
+                reviewsList.appendChild(createReviewElement(review));
+            });
+        }
+
+        // Manejador del formulario
         reviewForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const name = document.getElementById('name').value;
-            const rating = document.getElementById('rating').value;
-            const comment = document.getElementById('comment').value;
+            const nameInput = document.getElementById('name');
+            const ratingInput = document.getElementById('rating');
+            const commentInput = document.getElementById('comment');
 
-            // Crear el elemento de la nueva reseña
-            const newReview = document.createElement('div');
-            newReview.classList.add('review-item');
-            newReview.innerHTML = `
-                <div class="review-header">
-                    <span class="review-author">${escapeHTML(name)}</span>
-                    <span class="review-stars">${rating}</span>
-                </div>
-                <p class="review-text">${escapeHTML(comment)}</p>
-            `;
+            const name = nameInput.value.trim();
+            const rating = ratingInput.value;
+            const comment = commentInput.value.trim();
 
-            // Agregar la reseña al principio de la lista
-            reviewsList.prepend(newReview);
+            if (!name || !comment) {
+                alert("Por favor completa tu nombre y opinión sin dejarlos vacíos.");
+                return;
+            }
 
-            // Limpiar el formulario
+            const newReview = {
+                name: name,
+                rating: rating,
+                comment: comment,
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            // Guardar en almacenamiento local
+            const currentReviews = getSavedReviews();
+            currentReviews.unshift(newReview);
+            saveReviews(currentReviews);
+
+            // Agregar al inicio de la lista con animación
+            reviewsList.prepend(createReviewElement(newReview));
+
+            // Limpiar formulario y reenfocar
             reviewForm.reset();
         });
 
-        // Función sencilla para evitar inyección de código básico al escribir en el formulario
+        // Función para evitar inyección de código
         function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g,
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g,
                 tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
             );
         }
+
+        // Manejo de error al cargar imágenes remotas
+        function handleImageError(img, title) {
+            img.onerror = null; // Evitar loop si falla
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="350" viewBox="0 0 600 350">
+                <rect width="600" height="350" fill="#131c2e"/>
+                <circle cx="300" cy="150" r="50" fill="#1e293b"/>
+                <text x="300" y="160" fill="#00d2ff" font-family="sans-serif" font-size="28" text-anchor="middle" font-weight="bold">OCP ARCHIVE</text>
+                <text x="300" y="230" fill="#94a3b8" font-family="sans-serif" font-size="18" text-anchor="middle">${title}</text>
+            </svg>`;
+            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        }
+
+        // Cargar reseñas iniciales al cargar la página
+        renderReviews();
     </script>
 </body>
 </html>
